@@ -38,16 +38,29 @@ header {
     border-radius: 6px;
 }
 
+.calc-display-result {
+    width: 360px;
+    height: 10px;
+    background-color: #1D1D1D;
+    color: rgb(160, 159, 159);
+    text-align: right;
+    font-size: 17px;
+    padding: 10px;
+    border: none;
+    border-radius: 0;
+}
+
 .calc-display-input {
     width: 360px;
-    height: 60px;
-    margin: 20px 0;
-    border-radius: 6px;
+    height: 40px;
+    margin: 0 0 20px 0;
     background-color: #1D1D1D;
     color: #fff;
     text-align: right;
     font-size: 35px;
     padding: 10px;
+    border: none;
+    border-radius: 0;
 }
 
 
@@ -115,6 +128,11 @@ button {
         width: 300px;
         margin: 0 auto;
     }
+
+    .calc-display-result {
+        width: 280px;
+    }
+
     .calc-display-input {
         width: 280px;
     }
@@ -134,6 +152,9 @@ button {
 @media screen and (max-width: 400px) {
     .calc {
         width: 280px;
+    }
+    .calc-display-result {
+        width: 260px;
     }
     .calc-display-input {
         width: 260px;

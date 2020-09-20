@@ -4,11 +4,14 @@ const numbers = document.querySelectorAll('.number'),
       resultBtn = document.getElementById('result'),
       display = document.getElementById('display'),
       decimalBtn = document.getElementById('decimal');
+      resultDisplay = document.getElementById('result_display');
 
 let memoryCurrentNumber = '0',
     memoryNewNumber = false,
-    memoryPendingOperation = '',
-    isDecimalUsed = false; 
+    isDecimalUsed = false,
+    isResultDisplayEmpty = true,
+    isNewNumber = false;
+    isNewEquation = false;
 
 
 for (let i = 0; i < numbers.length; i++) {  
@@ -49,8 +52,16 @@ function numberPress(num) {
 
     if (display.value == '0') {
         display.value = num;
+    } else if (isNewNumber) {
+        display.value = num;
+        isNewNumber = false;
     } else {
         display.value += num;
+    }
+
+    if (isNewEquation) {
+        resultDisplay.innerHTML = '';
+        isNewEquation = false;
     }
 }
 
@@ -70,21 +81,34 @@ function clear(id) {
         }
     } else if (id = 'ce') {
         display.value = '0';
+        resultDisplay.innerHTML = '';
     }
-    
+
     isDecimalUsed = !(Number.isInteger(Number(display.value))); 
 }
 
 function result() {
-    display.value = eval(display.value);
+    let tempValue = display.value;
+
+    display.value = eval(resultDisplay.innerHTML + display.value);
+    resultDisplay.innerHTML += ' ' + tempValue + ' =';
 
     memoryNewNumber = true;
     isDecimalUsed  = false;
+    isResultDisplayEmpty = true;
+    isNewNumber = true;
+    isNewEquation = true;
 }
 
 function operation(symbol) {
-    display.value += " " + symbol + " ";
+    if (isNewEquation) {
+        resultDisplay.innerHTML = '';
+        isNewEquation = false;
+    }
 
+    resultDisplay.innerHTML += " " + display.value + " " + symbol;
+    isResultDisplayEmpty = false;
     memoryNewNumber = false;
     isDecimalUsed = false;
+    isNewNumber = true;
 }
