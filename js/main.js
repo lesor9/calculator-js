@@ -3,16 +3,27 @@ const numbers = document.querySelectorAll('.number'),
       clearBtns = document.querySelectorAll('.clear-btn'),
       resultBtn = document.getElementById('result'),
       display = document.getElementById('display'),
-      decimalBtn = document.getElementById('decimal');
-      resultDisplay = document.getElementById('result_display');
+      decimalBtn = document.getElementById('decimal'),
+      resultDisplay = document.getElementById('result_display'),
+      sqrtBtn = document.getElementById('sqrt'),
+      plusMinusBtn = document.getElementById('plusMinus'),
+      bracketsBtns = document.querySelectorAll('.brackets');
 
 let memoryCurrentNumber = '0',
     memoryNewNumber = false,
     isDecimalUsed = false,
     isResultDisplayEmpty = true,
-    isNewNumber = false;
-    isNewEquation = false;
+    isNewNumber = false,
+    isNewEquation = false,
+    isPlusMinus = false;
 
+
+for (let i = 0; i < bracketsBtns.length; i++) {  
+    let bracket = bracketsBtns[i];
+    bracket.addEventListener('click', function (e) {
+        brackets(e.target.textContent);
+    })
+}
 
 for (let i = 0; i < numbers.length; i++) {  
     let number = numbers[i];
@@ -43,6 +54,29 @@ decimalBtn.addEventListener('click', function () {
     decimal()
     })
 
+sqrtBtn.addEventListener('click', function () {
+    sqrt()
+    })
+
+plusMinusBtn.addEventListener('click', function () {
+    plusMinus()
+})
+
+function sqrt () {
+    resultDisplay.innerHTML += ' √';
+}
+
+function plusMinus () {
+    if (!isPlusMinus) {
+        display.value = '-' + display.value;
+        isPlusMinus = true;
+    } else {
+        display.value = display.value.slice(1, display.value.length);
+        isPlusMinus = false;    
+    }
+    
+    
+}
 
 function numberPress(num) {
     if (memoryNewNumber == true) {
@@ -89,9 +123,14 @@ function clear(id) {
 
 function result() {
     let tempValue = display.value;
-
-    display.value = myEval(resultDisplay.innerHTML + display.value);
-    resultDisplay.innerHTML += ' ' + tempValue + ' =';
+    if (resultDisplay.innerHTML[resultDisplay.innerHTML.length - 1] == ')') {
+        display.value = myEval(resultDisplay.innerHTML);
+        resultDisplay.innerHTML += ' ' + tempValue.slice(0, tempValue.length - 1) + ' =';
+    } else {
+        display.value = myEval(resultDisplay.innerHTML + display.value);
+        resultDisplay.innerHTML += ' ' + tempValue + ' =';
+    }
+    
 
     memoryNewNumber = true;
     isDecimalUsed  = false;
@@ -106,12 +145,46 @@ function operation(symbol) {
         isNewEquation = false;
     }
 
-    resultDisplay.innerHTML += " " + display.value + " " + symbol;
+    if (resultDisplay.innerHTML[resultDisplay.innerHTML.length - 1] == ')') {
+        resultDisplay.innerHTML += " " + symbol;
+    } else {
+        resultDisplay.innerHTML += " " + display.value + " " + symbol;
+    }
+    
     isResultDisplayEmpty = false;
     memoryNewNumber = false;
     isDecimalUsed = false;
     isNewNumber = true;
+    var lastSymbol = symbol;
 }
+
+function brackets(symbol) {
+    if (symbol == '(') {
+        if (display.value == '0') {
+            resultDisplay.innerHTML += " (";
+        } else if (isNewNumber) {
+            resultDisplay.innerHTML += " (";
+            display.value = '0';
+        }
+    }
+
+    if (symbol == ')') {
+        resultDisplay.innerHTML += " " + display.value + " )";
+        display.value = '0';
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 function myEval(expr) {
 	const stackNumbers = [];
@@ -121,7 +194,9 @@ function myEval(expr) {
     	'-' : 1,
     	'+' : 1,
     	'*' : 2,
-    	"/" : 2, 
+        "/" : 2,
+        '^' : 3,
+        '√' : 3,
     }
 
     let arr = devideStr(expr);
@@ -209,7 +284,7 @@ function myEval(expr) {
 
 
 	function devideStr(arr) {
-		const re = /([\-+/*)(])/;
+		const re = /([+–/*^√)(])/;
 	    arr = arr.split(re);
 
 	    for (i in arr) {
@@ -228,7 +303,7 @@ function myEval(expr) {
 	  		case "+" : 
 	  			stackNumbers.push(firstNum + SecondNum);
 	  			break;
-	  		case "-" : 
+	  		case "–" : 
 	  			stackNumbers.push(firstNum - SecondNum);
 	  			break;
 	  		case "*" : 
@@ -237,7 +312,14 @@ function myEval(expr) {
 	  		case "/" :
 	  			if (SecondNum == 0) throw("TypeError: Division by zero."); 
 	  			stackNumbers.push(firstNum / SecondNum);
-	  			break;
+                  break;
+            case "^" :
+                stackNumbers.push( Math.pow(firstNum, SecondNum) );
+                break;
+            case "√" :
+                stackNumbers.push(firstNum);
+                stackNumbers.push(Math.sqrt(SecondNum));
+                break;
 	  	}
 	}
 }
