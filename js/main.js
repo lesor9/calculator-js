@@ -15,7 +15,7 @@ let memoryCurrentNumber = '0',
     isResultDisplayEmpty = true,
     isNewNumber = false,
     isNewEquation = false,
-    isPlusMinus = false;
+    isplusMinus = false;
 
 
 for (let i = 0; i < bracketsBtns.length; i++) {  
@@ -67,6 +67,7 @@ function sqrt () {
 }
 
 function plusMinus () {
+    if (display.value[0] != '-') isPlusMinus = false;
     if (!isPlusMinus) {
         display.value = '-' + display.value;
         isPlusMinus = true;
@@ -74,8 +75,6 @@ function plusMinus () {
         display.value = display.value.slice(1, display.value.length);
         isPlusMinus = false;    
     }
-    
-    
 }
 
 function numberPress(num) {
@@ -124,10 +123,24 @@ function clear(id) {
 function result() {
     let tempValue = display.value;
     if (resultDisplay.innerHTML[resultDisplay.innerHTML.length - 1] == ')') {
-        display.value = myEval(resultDisplay.innerHTML);
-        resultDisplay.innerHTML += ' ' + tempValue.slice(0, tempValue.length - 1) + ' =';
+        let temp = myEval(resultDisplay.innerHTML);
+        if (temp == "otric") {
+            resultDisplay.innerHTML = "";
+            display.value = "0";
+            return;
+        } else {
+            display.value = temp;
+            resultDisplay.innerHTML += ' ' + tempValue.slice(0, tempValue.length - 1) + ' =';
+        }
+        
     } else {
-        display.value = myEval(resultDisplay.innerHTML + display.value);
+        temp = myEval(resultDisplay.innerHTML + display.value);
+        if (temp == "otric") {
+            resultDisplay.innerHTML = "";
+            display.value = "0";
+            return;
+        }   
+        display.value = temp;
         resultDisplay.innerHTML += ' ' + tempValue + ' =';
     }
     
@@ -191,7 +204,7 @@ function myEval(expr) {
     const stackOperations = [];
 
     const priorityOperations = {
-    	'-' : 1,
+    	'–' : 1,
     	'+' : 1,
     	'*' : 2,
         "/" : 2,
@@ -200,7 +213,6 @@ function myEval(expr) {
     }
 
     let arr = devideStr(expr);
-
 
     //check if open and close brackets are equal quantity
     let openBrackets = 0;
@@ -275,13 +287,32 @@ function myEval(expr) {
     	let firstNum = stackNumbers.pop();
  		let operat = stackOperations.pop();
 
-  		countFunc(firstNum, operat, SecondNum);
+        let res = countFunc(firstNum, operat, SecondNum);
+        if (res == 'otric') return 'otric';
     }
 
-	return stackNumbers[0];
+    let resultNumber = cleanEnding(stackNumbers[0]);
+	return resultNumber;
 
 
 
+
+
+    function cleanEnding(number) {
+        number = number.toString();
+        let match = number.match(/\.\d*/);
+        if (match === null) return number;
+        match = match[0];
+        let position = match.search(/0{4,}/);
+        console.log(position);
+        if (position == -1) {
+            return number;
+        } else {
+            let firstPart = number > 0 ? Math.floor(number) : '-' + Math.ceil(number);
+            number = firstPart + match.slice(0, position);
+        return number;
+        }
+    }
 
 	function devideStr(arr) {
 		const re = /([+–/*^√)(])/;
@@ -300,7 +331,7 @@ function myEval(expr) {
 
 	function countFunc(firstNum, operat, SecondNum) {
 		switch (operat) {
-	  		case "+" : 
+	  		case "+" :
 	  			stackNumbers.push(firstNum + SecondNum);
 	  			break;
 	  		case "–" : 
@@ -310,15 +341,21 @@ function myEval(expr) {
 	  			stackNumbers.push(firstNum * SecondNum);
 	  			break;
 	  		case "/" :
-	  			if (SecondNum == 0) throw("TypeError: Division by zero."); 
-	  			stackNumbers.push(firstNum / SecondNum);
-                  break;
+                if (SecondNum == 0) throw("TypeError: Division by zero."); 
+                stackNumbers.push(firstNum / SecondNum);
+                break;
             case "^" :
                 stackNumbers.push( Math.pow(firstNum, SecondNum) );
                 break;
             case "√" :
-                stackNumbers.push(firstNum);
+                if (SecondNum < 0) 
+                {
+                    alert("Корень из отрицательного!");
+                    return "otric";
+                }
+                if (firstNum) stackNumbers.push(firstNum);
                 stackNumbers.push(Math.sqrt(SecondNum));
+                
                 break;
 	  	}
 	}
